@@ -2,5 +2,6 @@
 .vs
 obj
 .git 
+bin
 
 Folder.DotSettings.user

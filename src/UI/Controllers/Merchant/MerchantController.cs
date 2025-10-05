@@ -1,34 +1,26 @@
+using Application;
 using Microsoft.AspNetCore.Mvc;
-using Infrastructure.config;
-using Domain.Payments.Merchant;
-using Microsoft.EntityFrameworkCore;
+using MediatR;
 
 namespace UI.Controllers;
 
-[Route("[controller]")]
+[Route("merchant")]
 [ApiController]
-public class MerchantController(PaymentsDbContext connections) : ControllerBase
+public class MerchantController(IMediator mediator) : ControllerBase
 {
 	[HttpGet("")]
 	public async Task<IActionResult> ListOfMerchants ()
 	{
-		var result = await connections.Merchants.Select(x => new Merchant
-		{
-			Id = x.Id,
-			ApiKey = x.ApiKey,
-			CreatedAt = x.CreatedAt,
-			Name = x.Name,
-		}).ToListAsync();
-		
+		var result = await mediator.Send(new QueryMerchantsList());
 		return Ok(result);
 	}
 	
 	[HttpPost("create")]
-	public async Task<IActionResult> CreateMerchant ([FromBody] Merchant merchant)
+	public async Task<IActionResult> CreateMerchant ([FromBody] MerchantRequest req)
 	{
-		connections.Merchants.Add(merchant);
-		await connections.SaveChangesAsync();
+		var merchantCreate = new CreateMerchant(req.Name, req.ApiKey);
+		var result = await mediator.Send(merchantCreate);
 		
-		return Ok(merchant);
+		return Ok(result);
 	}
 }

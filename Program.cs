@@ -1,5 +1,7 @@
+using Domain.Payments.Merchant;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.config;
+using Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,11 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<PaymentsDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
+
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssemblyContaining<Program>());
+
+builder.Services.AddScoped<IMerchantRepository, MerchantRepository>();
 
 var app = builder.Build();
 
